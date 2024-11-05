@@ -16,7 +16,7 @@ class viagens extends Model
             'Destino' => 'required|string',
             'Data_de_Ida' => 'required|date',
             'Data_de_Volta' => 'required|date',
-            'status' => 'required|string'
+            'status' => 'string'
         ];
     }
 
