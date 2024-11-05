@@ -16,10 +16,18 @@ class ViagensController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(StoreviagensRequest $request)
     {
-        $viagem = $this->viagem->all();
-        return response()->json($viagem, 200);
+        // Filtragem opcional por status
+        $status = $request->query('status');
+        $query = $this->viagem->query()->select('id', 'Nome_do_Solicitante', 'Destino', 'Data_de_Ida', 'Data_de_Volta', 'status');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $viagens = $query->get();
+        return response()->json($viagens, 200);
     }
 
     /**
@@ -28,15 +36,11 @@ class ViagensController extends Controller
     public function store(StoreviagensRequest $request)
     {
         try {
-            // Validação dos campos obrigatórios
             $request->validate($this->viagem->rules(), $this->viagem->feedback());
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'error' => $e->validator->errors()
-            ], 422); // 422 Unprocessable Entity
+            return response()->json(['error' => $e->validator->errors()], 422);
         }
 
-        // Verificar se já existe uma viagem com os mesmos dados
         $duplicata = $this->viagem->where([
             ['Nome_do_Solicitante', $request->Nome_do_Solicitante],
             ['Destino', $request->Destino],
@@ -45,9 +49,7 @@ class ViagensController extends Controller
         ])->first();
 
         if ($duplicata) {
-            return response()->json([
-                'error' => 'Viagem duplicada! Já existe uma viagem com esses dados.'
-            ], 409);
+            return response()->json(['error' => 'Viagem duplicada! Já existe uma viagem com esses dados.'], 409);
         }
 
         $this->viagem->create([
@@ -55,10 +57,10 @@ class ViagensController extends Controller
             'Destino' => $request->Destino,
             'Data_de_Ida' => Carbon::createFromFormat('d/m/Y', $request->Data_de_Ida)->format('Y-m-d'),
             'Data_de_Volta' => Carbon::createFromFormat('d/m/Y', $request->Data_de_Volta)->format('Y-m-d'),
-            'status' => $request->status
+            'status' => $request->input('status', 'solicitado') // Define "solicitado" como padrão
         ]);
 
-        return response()->json(['mensagem' =>'Pedido de Viagem criado com sucesso!'], 201);
+        return response()->json(['mensagem' => 'Pedido de Viagem criado com sucesso!'], 201);
     }
 
     /**
@@ -76,52 +78,25 @@ class ViagensController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateviagensRequest $request, $id)
+    public function update(StoreviagensRequest $request, $id)
     {
         $viagem = $this->viagem->find($id);
-        if($viagem === null){
+        if ($viagem === null) {
             return response()->json(['error' => 'ID dessa viagem não existe'], 404);
         }
 
-        if ($request->method() === 'PATCH') {
-            $dynamicRules = array();
-
-            foreach ($viagem->rules() as $input => $rule) {
-                if ($request->has($input)) {
-                   $dynamicRules[$input] = $rule;
-                }
-            }
-
-            try {
-                $request->validate($dynamicRules, $viagem->feedback());
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                return response()->json([
-                    'error' => $e->validator->errors()
-                ], 422); // 422 Unprocessable Entity
-            }
-        }else{
-            try {
-                $request->validate($viagem->rules(), $viagem->feedback());
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                return response()->json([
-                    'error' => $e->validator->errors()
-                ], 422); // 422 Unprocessable Entity
+        // Atualiza apenas o status
+        $status = $request->input('status');
+        if (in_array($status, ['aprovado', 'cancelado', 'solicitado'])) {
+            $viagem->update(['status' => $status]);
+            return response()->json(['mensagem' => 'Status do Pedido de Viagem atualizado com sucesso!'], 200);
+        } else {
+            if (!$request->input('status')) {
+                return response()->json(['error' => 'Campo inválido! Apenas alteração de "status" permitida.'], 400);
+            } else {
+                return response()->json(['error' => 'Status inválido! Apenas "solicitado", "aprovado" ou "cancelado" são permitidos.'], 400);
             }
         }
-
-        $dataToUpdate = $request->only(['Nome_do_Solicitante', 'Destino', 'Data_de_Ida', 'Data_de_Volta', 'status']);
-
-        // Formatar as datas se estiverem presentes na requisição
-        if ($request->filled('Data_de_Ida')) {
-            $dataToUpdate['Data_de_Ida'] = Carbon::createFromFormat('d/m/Y', $request->Data_de_Ida)->format('Y-m-d');
-        }
-        if ($request->filled('Data_de_Volta')) {
-            $dataToUpdate['Data_de_Volta'] = Carbon::createFromFormat('d/m/Y', $request->Data_de_Volta)->format('Y-m-d');
-        }
-
-        $viagem->update($dataToUpdate);
-
-        return response()->json(['mensagem' => 'Pedido de Viagem atualizado com sucesso!'], 200);
     }
 
     /**
