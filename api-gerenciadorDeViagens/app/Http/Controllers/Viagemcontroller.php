@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\viagens;
-use App\Http\Requests\StoreviagensRequest;
-use App\Http\Requests\UpdateviagensRequest;
+use App\Models\Viagem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
-class ViagensController extends Controller
+class Viagemcontroller extends Controller
 {
-    public function __construct(viagens $viagem){
+    public function __construct(Viagem $viagem){
         $this->viagem = $viagem;
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function index(StoreviagensRequest $request)
+    public function index(Request $request)
     {
         // Filtragem opcional por status
         $status = $request->query('status');
@@ -33,7 +32,7 @@ class ViagensController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreviagensRequest $request)
+    public function store(Request $request)
     {
         try {
             $request->validate($this->viagem->rules(), $this->viagem->feedback());
@@ -78,7 +77,7 @@ class ViagensController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreviagensRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $viagem = $this->viagem->find($id);
         if ($viagem === null) {

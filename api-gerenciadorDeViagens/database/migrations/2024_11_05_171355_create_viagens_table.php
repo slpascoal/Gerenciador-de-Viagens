@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('Destino');
             $table->date('Data_de_Ida');
             $table->date('Data_de_Volta');
-            $table->string('status');
+            $table->enum('status', ['solicitado', 'aprovado', 'cancelado'])->default('solicitado');
             $table->timestamps();
         });
     }

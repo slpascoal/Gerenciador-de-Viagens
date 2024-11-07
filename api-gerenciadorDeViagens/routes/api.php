@@ -7,4 +7,4 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::apiResource('viagem', 'App\Http\Controllers\ViagensController');
+Route::apiResource('viagem', 'App\Http\Controllers\Viagemcontroller');

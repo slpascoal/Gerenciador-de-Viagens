@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class viagens extends Model
+class Viagem extends Model
 {
     use HasFactory;
+    protected $table = 'viagens';
     protected $fillable = ['Nome_do_Solicitante', 'Destino', 'Data_de_Ida' , 'Data_de_Volta', 'status'];
 
     public function rules () {
