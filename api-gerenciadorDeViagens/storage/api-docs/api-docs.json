@@ -1,0 +1,428 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API: Gerenciador de Viagens",
+        "description": "Documentação da API para o gerenciamento de pedidos de viagens corporativas.",
+        "contact": {
+            "email": "slpascoal01@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/viagem": {
+            "get": {
+                "tags": [
+                    "Viagens"
+                ],
+                "summary": "Lista todos os pedidos de viagem",
+                "description": "Retorna uma lista de pedidos de viagem. Permite a filtragem opcional por status (solicitado, aprovado, cancelado).",
+                "operationId": "f81720b953d4178b51e3cd17ca95f13d",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtra os pedidos de viagem pelo status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "solicitado",
+                                "aprovado",
+                                "cancelado"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de pedidos de viagem",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "Nome_do_Solicitante": {
+                                                "type": "string",
+                                                "example": "João"
+                                            },
+                                            "Destino": {
+                                                "type": "string",
+                                                "example": "Brasil"
+                                            },
+                                            "Data_de_Ida": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2024-11-10"
+                                            },
+                                            "Data_de_Volta": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2024-11-20"
+                                            },
+                                            "status": {
+                                                "type": "string",
+                                                "example": "solicitado"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Requisição inválida"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Viagens"
+                ],
+                "summary": "Cria um novo pedido de viagem",
+                "description": "Este endpoint cria um novo pedido de viagem corporativa. O status é definido como 'solicitado' por padrão, caso não seja informado.",
+                "operationId": "e00ce39312c618c6e00d9fab7d45229d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "Nome_do_Solicitante",
+                                    "Destino",
+                                    "Data_de_Ida",
+                                    "Data_de_Volta"
+                                ],
+                                "properties": {
+                                    "Nome_do_Solicitante": {
+                                        "type": "string",
+                                        "example": "Tayna"
+                                    },
+                                    "Destino": {
+                                        "type": "string",
+                                        "example": "Russia"
+                                    },
+                                    "Data_de_Ida": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-11-06"
+                                    },
+                                    "Data_de_Volta": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-11-08"
+                                    },
+                                    "status": {
+                                        "description": "O status pode ser 'solicitado', 'aprovado' ou 'cancelado'. Se não informado, será atribuído 'solicitado'.",
+                                        "type": "string",
+                                        "example": "solicitado"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pedido de Viagem criado com sucesso!",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Pedido de Viagem criado com sucesso!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação. Campos obrigatórios ou com formato inválido.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "properties": {
+                                                "Nome_do_Solicitante": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Obrigatório preencher esse campo"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Viagem duplicada! Já existe uma viagem com esses dados.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Viagem duplicada! Já existe uma viagem com esses dados."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/viagem/{id}": {
+            "get": {
+                "tags": [
+                    "Viagens"
+                ],
+                "summary": "Obter detalhes de um pedido de viagem",
+                "description": "Retorna as informações detalhadas de uma viagem específica com base no ID fornecido",
+                "operationId": "63aecaae823f4a66080568e0c9bf1a2b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do pedido de viagem",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhes do pedido de viagem",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "Nome_do_Solicitante": {
+                                            "type": "string",
+                                            "example": "Tayna"
+                                        },
+                                        "Destino": {
+                                            "type": "string",
+                                            "example": "Russia"
+                                        },
+                                        "Data_de_Ida": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2024-11-06"
+                                        },
+                                        "Data_de_Volta": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2024-11-08"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "solicitado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido de viagem não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "ID dessa viagem não existe"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Viagens"
+                ],
+                "summary": "Exclui um pedido de viagem",
+                "description": "Exclui um pedido de viagem com o ID especificado.",
+                "operationId": "e6fc3352020a689420af49c41c585041",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do pedido de viagem a ser excluído",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido de Viagem removido com sucesso!",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Pedido de Viagem removido com sucesso!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ID dessa viagem não existe",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "ID dessa viagem não existe"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Viagens"
+                ],
+                "summary": "Atualiza o status de um pedido de viagem",
+                "description": "Atualiza apenas o campo `status` do pedido de viagem com base no ID fornecido.",
+                "operationId": "updateViagemStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do pedido de viagem a ser atualizado",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "description": "Novo status do pedido de viagem",
+                                        "type": "string",
+                                        "enum": [
+                                            "solicitado",
+                                            "aprovado",
+                                            "cancelado"
+                                        ],
+                                        "example": "aprovado"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status do Pedido de Viagem atualizado com sucesso!",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Status do Pedido de Viagem atualizado com sucesso!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ID da viagem não existe",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "ID dessa viagem não existe"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação de campo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Campo inválido! Apenas alteração de 'status' permitida."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Viagens",
+            "description": "Viagens"
+        }
+    ]
+}
