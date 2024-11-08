@@ -247,16 +247,17 @@ class Viagemcontroller extends Controller
  *     )
  * )
  */   
-    public function update(Request $request, $id)
-    {
-        $viagem = $this->viagem->find($id);
-        if ($viagem === null) {
-            return response()->json(['error' => 'ID dessa viagem não existe'], 404);
-        }
+    
+public function update(Request $request, $id)
+{
+    $viagem = $this->viagem->find($id);
+    if ($viagem === null) {
+        return response()->json(['error' => 'ID dessa viagem não existe'], 404);
+    }
 
-        // Atualiza apenas o status
-        $status = $request->input('status');
-        if (in_array($status, ['aprovado', 'cancelado', 'solicitado'])) {
+    // Atualiza apenas o status
+    $status = $request->input('status');
+    if (in_array($status, ['aprovado', 'cancelado', 'solicitado'])) {
             $viagem->update(['status' => $status]);
             return response()->json(['mensagem' => 'Status do Pedido de Viagem atualizado com sucesso!'], 200);
         } else {
@@ -266,7 +267,7 @@ class Viagemcontroller extends Controller
                 return response()->json(['error' => 'Status inválido! Apenas "solicitado", "aprovado" ou "cancelado" são permitidos.'], 400);
             }
         }
-    }
+}
 
     /**
      * @OA\Delete(
