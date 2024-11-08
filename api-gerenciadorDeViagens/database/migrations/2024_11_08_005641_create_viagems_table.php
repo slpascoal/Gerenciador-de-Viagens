@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         //o nome do solicitante, o destino, a data de ida, a data de volta e o status (solicitado, aprovado, cancelado).
-        Schema::create('viagens', function (Blueprint $table) {
+        Schema::create('viagems', function (Blueprint $table) {
             $table->id();
             $table->string('Nome_do_Solicitante');
             $table->string('Destino');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('viagens');
+        Schema::dropIfExists('viagems');
     }
 };
